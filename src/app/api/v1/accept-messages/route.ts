@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import { User } from "next-auth";
 import dbconnect from "@/db/dbConfig";
+import { acceptMessageSchema } from "@/schemas/acceptMessageSchema";
+import { z } from "zod"
 
 export async function POST(req: Request) {
     await dbconnect();
@@ -21,13 +23,27 @@ export async function POST(req: Request) {
 
     const userId = user._id;
     const { acceptingMessages } = await req.json();
+
+    const result = acceptMessageSchema.safeParse({ acceptMessages: acceptingMessages });
+
+    if (!result.success) {
+        const acceptMessageError = result.error.format().acceptMessages?._errors || [];
+        return Response.json(
+            {
+                success: false,
+                message: acceptMessageError.length > 0 ? acceptMessageError?.join(", ") : "Message acceptance status must be of type boolean",
+            }, {
+            status: 400
+        })
+    }
+
     try {
         const updatedUser = await UserModel.findByIdAndUpdate(
             userId,
             { isAcceptingMessages: acceptingMessages },
             { new: true }
         ).select("-password -verificationCode -verificationCodeExpiry -messages");
-        console.log("Updated User Accepting Messages:",updatedUser);
+        console.log("Updated User Accepting Messages:", updatedUser);
 
         if (!updatedUser) {
             return Response.json(
@@ -62,7 +78,7 @@ export async function POST(req: Request) {
     }
 }
 
-export async function GET(req: Request){
+export async function GET(req: Request) {
     await dbconnect();
 
     const session = await getServerSession(authOptions);
@@ -82,14 +98,14 @@ export async function GET(req: Request){
 
     try {
         const foundUser = await UserModel.findById(userId);
-        if(!foundUser){
+        if (!foundUser) {
             return Response.json(
                 {
                     success: false,
                     message: "User not found"
                 }, {
                 status: 404
-            }) 
+            })
         }
         return Response.json(
             {
@@ -101,7 +117,7 @@ export async function GET(req: Request){
         })
 
     } catch (error) {
-        console.log("Error->",error)
+        console.log("Error->", error)
         return Response.json(
             {
                 success: false,
