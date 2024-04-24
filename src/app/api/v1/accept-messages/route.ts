@@ -4,7 +4,6 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import { User } from "next-auth";
 import dbconnect from "@/db/dbConfig";
 import { acceptMessageSchema } from "@/schemas/acceptMessageSchema";
-import { z } from "zod"
 
 export async function POST(req: Request) {
     await dbconnect();
