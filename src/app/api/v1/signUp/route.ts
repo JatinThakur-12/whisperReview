@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs"
 import { sendVerificationEmai } from "@/utils/sendVerificationEmail";
 import UserModel from "@/models/User";
 import { generateOtp } from "@/utils/generateOtp";
+import { log } from "console";
 
 
 export async function POST(req: NextRequest) {
@@ -83,6 +84,8 @@ export async function POST(req: NextRequest) {
             }, {
                 status: 500
             })
+        }else if(emailResponse.success){
+            console.log(emailResponse);   
         }
 
         return Response.json(//Response is email sent successfully
