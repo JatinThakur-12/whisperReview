@@ -187,7 +187,7 @@ const page = () => {
             Already a member? &nbsp;
             <Link
               className="text-blue-600 hover:text-blue-800"
-              href={"/signin"}
+              href={"/sign-in"}
             >
               Sign in
             </Link>
